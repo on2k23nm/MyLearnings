@@ -1,0 +1,5 @@
+Sec01-OverviewAndSetup.ipynb filter=lfs diff=lfs merge=lfs -text
+Sec02-PyTrochIntro.ipynb filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+ImageTransformationNotes.ipynb filter=lfs diff=lfs merge=lfs -text
