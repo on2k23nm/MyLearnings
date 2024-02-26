@@ -2,3 +2,5 @@
 *.csv
 *.jpg
 Albumentations/TGSSaltIdentificationChallenge/*
+*/__pycache__/*
+*.pyc
