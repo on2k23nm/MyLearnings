@@ -3,7 +3,7 @@
 
 # ![image.png](attachment:image.png)
 
-# In[6]:
+# In[36]:
 
 
 import random
@@ -21,13 +21,13 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 
-# In[26]:
+# In[37]:
 
 
 PROCESSED_IMAGES_DIR = Path('/home/onkar/DATASET/carvana-image-masking-challenge/processed/')
 
 
-# In[27]:
+# In[38]:
 
 
 class DoubleConv(nn.Module):
@@ -86,7 +86,7 @@ class DoubleConv(nn.Module):
 # * Bottom part of 'U' shape will be created outside for loops. 
 # * For upsampling part we'll going to be doing transposed convolutions. What you could also do here is to do bilinear and then conv layer afterwords and (GAN and pro-GAN they realised that transposed convolutions create these artifacts and they started to use that, I amagine that will be a better and cheaper option). But we'll stick to the paper.
 
-# In[28]:
+# In[39]:
 
 
 class UNet(nn.Module):
@@ -98,7 +98,7 @@ class UNet(nn.Module):
         self.pool       = nn.MaxPool2d(kernel_size=2, stride=2)
         
         # Final conv
-        self.final_conv = nn.Conv2d(features[0], out_channels=3, kernel_size=1)
+        self.final_conv = nn.Conv2d(features[0], out_channels=1, kernel_size=1)
     
         # Implemenation of DOWN part ->
         for feature in features:
@@ -116,24 +116,28 @@ class UNet(nn.Module):
         # lowest part of 'U'
         self.bottleneck = DoubleConv(features[-1], 2*features[-1])
     
-    # Implementation of cropping function for skip connection
-    def crop_tensor(self, target_tensor, ref_tensor):
-        # Calcualte the cropping size fo the spatial dimensions (H & W)
-        delta_h = target_tensor.shape[2] - ref_tensor.shape[2]
-        delta_w = target_tensor.shape[3] - ref_tensor.shape[3]
+    # # Implementation of cropping function for skip connection
+    # def crop_tensor(self, target_tensor, ref_tensor):
+    #     # Calcualte the cropping size fo the spatial dimensions (H & W)
+    #     delta_h = target_tensor.shape[2] - ref_tensor.shape[2]
+    #     delta_w = target_tensor.shape[3] - ref_tensor.shape[3]
         
-        # Actually this code part is redundant as skip connection size will always
-        # be larger than the size after max-pool
-        crop_h1 = max(delta_h//2, 0)
-        crop_w1 = max(delta_w//2, 0)
+    #     if delta_h % 2 != 0 : delta_h += 1 
+    #     if delta_w % 2 != 0 : delta_w += 1 
+    #     print(f'target_tensor.size : {target_tensor.size()}, ref_tensor.size : {ref_tensor.size()}')
         
-        crop_h2 = crop_h1 + ref_tensor.shape[2]
-        crop_w2 = crop_w1 + ref_tensor.shape[3]
+    #     # crop_h1 = max(delta_h//2, 0)
+    #     # crop_w1 = max(delta_w//2, 0)
+    #     crop_h1 = delta_h//2
+    #     crop_w1 = delta_w//2
         
-        crop_h2 = min(crop_h2, target_tensor.shape[2])
-        crop_w2 = min(crop_w2, target_tensor.shape[3])
+    #     crop_h2 = crop_h1 + ref_tensor.shape[2]
+    #     crop_w2 = crop_w1 + ref_tensor.shape[3]
         
-        return target_tensor[:, :, crop_h1:crop_h2, crop_w1:crop_w2]
+    #     # crop_h2 = min(crop_h2, target_tensor.shape[2])
+    #     # crop_w2 = min(crop_w2, target_tensor.shape[3])
+        
+    #     return target_tensor[:, :, crop_h1:crop_h2, crop_w1:crop_w2]
             
     def forward(self, x):
         skip_conn = []
@@ -154,8 +158,13 @@ class UNet(nn.Module):
         for up_conv, up in zip(self.up_convs, self.ups):
             x = up_conv(x)
             if x.shape != skip_conn[idx].shape:
-                #print(f'x.shape : {x.shape}, skip_conn[{idx}].shape : {skip_conn[idx].shape}')
-                skip_conn[idx] = self.crop_tensor(skip_conn[idx], x)
+                x = TF.resize(x, size=skip_conn[idx].shape[2:], antialias=True)
+                # Original model does cropping, but there are issues with it that
+                # needs to be fixed first. For now, let's use simple resizing to make x to the size of
+                # skip connection.
+                
+                # print(f'x.shape : {x.shape}, skip_conn[{idx}].shape : {skip_conn[idx].shape}')
+                # skip_conn[idx] = self.crop_tensor(skip_conn[idx], x)
             x = torch.concat((x, skip_conn[idx]), dim=1)
             x = up(x)
             
@@ -167,13 +176,13 @@ class UNet(nn.Module):
         return final
 
 
-# In[29]:
+# In[40]:
 
 
-## For testing purpose only -- << COMMENT AFTER USE >> --
+# # For testing purpose only -- << COMMENT AFTER USE >> --
 # def test():
-#     x = torch.randn((1, 3, 1792, 832))
-#     model = UNet(in_channels=3, out_channels=2)
+#     x = torch.randn((1, 3, 312,617))
+#     model = UNet(in_channels=3, out_channels=1)
 #     pred = model(x)
 #     print(x.shape)
 #     print(pred.shape)
