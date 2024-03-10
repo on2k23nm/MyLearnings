@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[7]:
+# In[ ]:
 
 
 import random
@@ -15,13 +15,13 @@ from tqdm.notebook import tqdm
 import matplotlib.pyplot as plt
 
 
-# In[8]:
+# In[ ]:
 
 
 PROCESSED_IMAGES_DIR = Path('/home/onkar/DATASET/carvana-image-masking-challenge/processed/')
 
 
-# In[9]:
+# In[ ]:
 
 
 # random.seed(42)
@@ -72,7 +72,7 @@ class CaravanaDataset(Dataset):
         return (torch.from_numpy(image), torch.from_numpy(mask))
 
 
-# In[10]:
+# In[ ]:
 
 
 # # for testing purpose only
@@ -81,7 +81,7 @@ class CaravanaDataset(Dataset):
 # PIN_MEMORY = True
 
 
-# In[11]:
+# In[ ]:
 
 
 # TRAINING_DATASET = PROCESSED_IMAGES_DIR/'train'
@@ -102,11 +102,11 @@ class CaravanaDataset(Dataset):
 # # print(image1, mask1)
 # fig, axes = plt.subplots(1, 2, figsize=(10, 10))
 # axes[0].imshow(image1[0].numpy())
-# axes[1].imshow(mask1[0].numpy())
+# axes[1].imshow(mask1[0].numpy(), cmap='gray')
 # plt.show()
 
 
-# In[12]:
+# In[ ]:
 
 
 # VALIDATION_DATASET = PROCESSED_IMAGES_DIR/'val'
@@ -128,7 +128,7 @@ class CaravanaDataset(Dataset):
 
 # fig, axes = plt.subplots(1, 2, figsize=(10, 10))
 # axes[0].imshow(image2[0].numpy())
-# axes[1].imshow(mask2[0].numpy())
+# axes[1].imshow(mask2[0].numpy(), cmap='gray')
 # plt.show()
 
 
