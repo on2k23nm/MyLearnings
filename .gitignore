@@ -4,3 +4,4 @@
 Albumentations/TGSSaltIdentificationChallenge/*
 */__pycache__/*
 *.pyc
+UNet/checkpoints/*
